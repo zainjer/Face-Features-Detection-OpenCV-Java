@@ -35,13 +35,23 @@ public class Main {
             return;
         }
 
-        VideoCapture cap = new VideoCapture(0);
+
+        VideoCapture cap = new VideoCapture(1);
         Mat frame = new Mat();
+
+
+        Scalar col1 = new Scalar(111, 71, 239);
+        Scalar col2 = new Scalar(102, 209, 255);
+        Scalar col3 = new Scalar(160, 214, 6);
+        Scalar col4 = new Scalar(178, 138, 17);
+        Scalar col5 = new Scalar(76, 59, 7);
 
         if(!cap.isOpened()){
             System.out.println("No cam found");
             return;
         }
+
+        Mat lastFrame = new Mat();
         while (true) {
             cap.read(frame);
 
@@ -56,13 +66,25 @@ public class Main {
             if(faceRects.length>0) {
                 for (Rect r : faceRects) {
                     //209, 195, 0
-                    Imgproc.rectangle(frame, r, new Scalar(189, 176, 0), 3);
+                    Imgproc.rectangle(frame, r, col1, 2);
+                    int font = Imgproc.FONT_HERSHEY_DUPLEX;
+
+                    Point startingPoint = new Point(r.tl().x-1,r.br().y);
+                    Point endingPoint = new Point(r.br().x,r.br().y+25);
+                    Imgproc.rectangle(frame,startingPoint,endingPoint,col1,-1);
+
+                    double fontScale = (r.br().x/r.tl().x)/2;
+                    //System.out.println(fontScale);
+
+                    Imgproc.putText(frame,"Person Detected",new Point(r.tl().x+5,r.br().y+18),Imgproc.FONT_HERSHEY_PLAIN,fontScale,new Scalar(255, 255, 255),1);
+
                     Mat face = new Mat(frame,r);
 
                     //EYE DETECTION CODE STARTS HERE
                     MatOfRect eyes = new MatOfRect();
                     eyeCascade.detectMultiScale(face,eyes,1.1,3,0);
                     Rect[] eyeRects = eyes.toArray();
+
 
                     if(eyeRects.length<=2 && eyeRects.length>0 ) //For 1 or 2 eye draw
                     //if(eyeRects.length>1) // For eye draw on all faces
@@ -71,7 +93,20 @@ public class Main {
                             Point tl = new Point(r.tl().x+e.tl().x,r.tl().y+e.tl().y);
                             Point br = new Point(r.tl().x+e.br().x,r.tl().y+e.br().y);
 
-                            Imgproc.rectangle(frame,tl,br, new Scalar(123, 189, 0),2);
+                            //Imgproc.rectangle(frame,tl,br, new Scalar(123, 189, 0),2);
+                            Imgproc.rectangle(frame,tl,br, col2,2);
+                            double centerX = ((br.x - tl.x)/2)+tl.x;
+                            double centerY = ((br.y - tl.y)/2)+tl.y;
+
+                            Point center = new Point(centerX,centerY);
+                            double radius =  (br.x-tl.x)/2;
+
+                            //Imgproc.circle(frame,center, (int) radius,new Scalar(123, 189, 0));
+                            Imgproc.line(frame,br,new Point(frame.width()-145,br.y),col2,2);
+
+
+                            //Imgproc.putText(frame,"Eye",new Point(centerX,br.y-10),font,0.5,new Scalar(255, 255, 255),1);
+                            Imgproc.putText(frame,"Analyzing Eyes..",new Point(frame.width()-140,br.y),font,0.5,new Scalar(255, 255, 255),1);
                         }
                     }
                     //EYE DETECTION CODE ENDS HERE
@@ -89,7 +124,11 @@ public class Main {
                             Point tl = new Point(r.tl().x+n.tl().x,r.tl().y+n.tl().y);
                             Point br = new Point(r.tl().x+n.br().x,r.tl().y+n.br().y);
 
-                            Imgproc.rectangle(frame,tl,br, new Scalar(181, 119, 100),2);
+                            Imgproc.rectangle(frame,tl,br, col3,2);
+                            Imgproc.line(frame,br,new Point(frame.width()-205,br.y),col3,2);
+
+                            //Imgproc.putText(frame,"Nose",new Point(tl.x, br.y),font,0.5,new Scalar(255, 255, 255),1);
+                            Imgproc.putText(frame,"Determining Nose type",new Point(frame.width()-200,br.y),font,0.5,new Scalar(255, 255, 255),1);
                         }
                     }
                     //Nose DETECTION CODE ENDS HERE
@@ -107,7 +146,10 @@ public class Main {
                             Point tl = new Point(r.tl().x+m.tl().x,r.tl().y+m.tl().y);
                             Point br = new Point(r.tl().x+m.br().x,r.tl().y+m.br().y);
 
-                            Imgproc.rectangle(frame,tl,br, new Scalar(50, 100, 255),2);
+                            Imgproc.rectangle(frame,tl,br, col4,2);
+                            //Imgproc.putText(frame,"Mouth",new Point(tl.x, br.y),font,0.5,new Scalar(255, 255, 255),1);
+                            Imgproc.line(frame,br,new Point(frame.width()-155,br.y),col4,2);
+                            Imgproc.putText(frame,"Detecting lips...",new Point(frame.width()-150,br.y),font,0.5,new Scalar(255, 255, 255),1);
                         }
                     }
                     //MOUTH DETECTION CODE ENDS HERE
